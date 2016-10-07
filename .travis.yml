@@ -1,0 +1,11 @@
+language: python
+sudo: false
+python:
+  - "2.7"
+env:
+  - DJANGO_VERSION=1.9
+install:
+  - pip install -q Django==$DJANGO_VERSION
+  - pip install -r requirements-test.pip
+script:
+  - coverage run setup.py test
