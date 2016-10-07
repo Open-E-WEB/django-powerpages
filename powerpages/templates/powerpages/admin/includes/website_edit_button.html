@@ -1,0 +1,10 @@
+<li>
+    <a href="{% page_url powerpages:switch_edit_mode %}" class="historylink">
+      Edit mode is 
+      {% if request.session.WEBSITE_EDIT_MODE %}
+        <span style="color: green">ON</span>
+      {% else %}
+        <span style="color: red">OFF</span>
+      {% endif %}
+    </a>
+</li>

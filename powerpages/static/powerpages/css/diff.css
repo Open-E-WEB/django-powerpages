@@ -1,0 +1,11 @@
+/* Styles related to displaying DIFFs in Admin */
+
+.diff-added {
+    color: green;
+}
+.diff-removed {
+    color: red;
+}
+.diff-info {
+    color: blue;
+}

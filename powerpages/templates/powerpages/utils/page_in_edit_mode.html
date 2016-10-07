@@ -1,0 +1,29 @@
+<div id="cms-page-info" class="cms-content-info">
+  <h5>Page Information:</h5>
+  <ul>
+    <li>
+      <span>Name: </span>
+      <strong>{{ website_page.title|default:'(Undefined)' }}</strong>
+    </li>
+    <li>
+      <span>Alias: </span>
+      <strong>{{ website_page.alias|default:'(Undefined)' }}</strong>
+    </li>
+    <li>
+      <span>ID: </span>
+      <strong>{{ website_page.pk|default:'(Undefined)' }}</strong>
+    </li>
+    <li>
+    {% if website_page %}
+      <a href="{{ website_page.get_admin_url }}">edit in Admin &raquo;</a>
+    {% else %}
+      <span>(Admin location unknown)</span>
+    {% endif %}
+    </li>
+    <li>
+       <a href="{% page_url powerpages:switch_edit_mode %}">
+         disable Edit Mode &raquo;
+       </a>
+    </li>
+  </ul>
+</div>

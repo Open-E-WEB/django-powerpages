@@ -1,0 +1,6 @@
+*.pyc
+*.log
+*.sqlite
+/.env/
+/.eggs/
+/.idea/
