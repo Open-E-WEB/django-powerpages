@@ -1,7 +1,10 @@
 django-powerpages
 =================
 
-**TODO**: links: travis, pypi, coveralls
+.. image:: https://api.travis-ci.org/Open-E-WEB/django-powerpages.svg?branch=master
+   :target: https://travis-ci.org/Open-E-WEB/django-powerpages
+
+.. links: pypi, coveralls
 
 Developer-friendly, simple CMS for Django, "flatpages on steroids".
 
