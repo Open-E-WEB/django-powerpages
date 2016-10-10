@@ -402,12 +402,8 @@ class BaseSyncOperation(object):
 class WebsiteDumpOperation(BaseSyncOperation):
     """DUMPS website Pages TO structure of directories and file"""
 
-    def run(self):
-        """Performs the operation"""
-        root_page = Page.objects.filter(url=self.root_url).first()
-        if not root_page:
-            self.error(u'Root page "{0}" not found!'.format(self.root_url))
-        summary = collections.defaultdict(int)
+    def dump_existing_pages(self, root_page, summary):
+        """Dumps content of root page and children"""
         valid_paths = set([app_settings.SYNC_DIRECTORY])
         page_iterator = \
             itertools.chain([root_page], root_page.descendants().iterator())
@@ -438,7 +434,10 @@ class WebsiteDumpOperation(BaseSyncOperation):
                 valid_paths.add(valid_path)
                 valid_path = os.path.dirname(valid_path)
             summary[status] += 1
-        # Delete files ONLY in subtree of root:
+        return valid_paths
+
+    def delete_unused_files(self, root_page, valid_paths, summary):
+        """Deletes unused files ONLY in subtree of root"""
         if root_page.children():
             delete_start_path = os.path.dirname(
                 PageFileDumper(root_page).absolute_path()
@@ -469,13 +468,16 @@ class WebsiteDumpOperation(BaseSyncOperation):
                     else:
                         os.remove(delete_path)
                 summary[status] += 1
-        self.summary(summary)
+
+    def add_to_vcs(self, summary):
         if (
             self.git_add and
             (SyncStatus.DELETED in summary or SyncStatus.ADDED in summary) and
             not self.dry_run and
             self.confirm(
-                question=u"Do you want to add created and removed files to GIT?"
+                question=(
+                    u"Do you want to add created and removed files to GIT?"
+                )
             )
         ):
             output, errors = subprocess.Popen(
@@ -486,14 +488,23 @@ class WebsiteDumpOperation(BaseSyncOperation):
             if errors:
                 raise self.error(u"Adding file changes to GIT failed!")
 
+    def run(self):
+        """Performs the operation"""
+        root_page = Page.objects.filter(url=self.root_url).first()
+        if not root_page:
+            self.error(u'Root page "{0}" not found!'.format(self.root_url))
+        summary = collections.defaultdict(int)
+        valid_paths = self.dump_existing_pages(root_page, summary)
+        self.delete_unused_files(root_page, valid_paths, summary)
+        self.summary(summary)
+        self.add_to_vcs(summary)
+
 
 class WebsiteLoadOperation(BaseSyncOperation):
     """LOADS website Pages FROM structure of directories and file"""
 
-    def run(self):
-        """Performs the operation"""
-        summary = collections.defaultdict(int)
-        valid_pks = set()
+    def page_loaders(self):
+        """Builds a list of page loaders"""
         root_path = url_to_path(self.root_url, has_children=False)
         if (
             os.path.exists(
@@ -523,6 +534,12 @@ class WebsiteLoadOperation(BaseSyncOperation):
                         absolute_path, app_settings.SYNC_DIRECTORY
                     )
                     page_loaders.append(FilePageLoader(relative_path))
+        return page_loaders
+
+    def load_existing_files(self, summary):
+        """Loads pages from existing files"""
+        valid_pks = set()
+        page_loaders = self.page_loaders()
         for page_loader in page_loaders:
             status = page_loader.status()
             if status != SyncStatus.NO_CHANGES:
@@ -559,6 +576,10 @@ class WebsiteLoadOperation(BaseSyncOperation):
             if loaded_page:
                 valid_pks.add(loaded_page.pk)
             summary[status] += 1
+        return valid_pks
+
+    def delete_unused_pages(self, valid_pks, summary):
+        """Removes unused pages only in subtree of root"""
         pages_to_delete = Page.objects.filter(
             url__startswith=self.root_url
         ).exclude(
@@ -583,6 +604,12 @@ class WebsiteLoadOperation(BaseSyncOperation):
             if apply_change and not self.dry_run:
                 page.delete()
             summary[status] += 1
+
+    def run(self):
+        """Performs the operation"""
+        summary = collections.defaultdict(int)
+        valid_pks = self.load_existing_files(summary)
+        self.delete_unused_pages(valid_pks, summary)
         if self.dry_run:
             self.log(
                 u"WARNING: Number of deleted records may be inadequate "

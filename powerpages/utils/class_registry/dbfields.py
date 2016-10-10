@@ -62,7 +62,8 @@ class BaseRegistryItemConfigField(models.TextField):
 
     def from_db_value(self, value, expression, connection, context):
         """
-        Convert our YAML string to a Python object after we load it from the DB.
+        Convert our YAML string to a Python object
+        after we load it from the DB.
         """
         if value == "":
             return None

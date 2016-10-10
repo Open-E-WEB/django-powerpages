@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 
-
 from django.core.validators import ValidationError
+
+
+def default_converter(value):
+    return value
 
 
 class UndefinedVariable(Exception):
@@ -33,7 +36,7 @@ class Config(object):
         for name, variable in self.variable_by_name.items():
             try:
                 variable.validate_value(self.data)
-            except ValidationError, e:
+            except ValidationError as e:
                 for message in e.messages:
                     errors.append(u'{0}: {1}'.format(name, message))
         if errors:
@@ -59,9 +62,7 @@ class ConfigVariable(object):
                 'Options `converter` and `choices` are exclusive.'
             )
         self.name = name
-        if converter is None:
-            converter = lambda value: value
-        self.converter = converter
+        self.converter = converter if converter else default_converter
         self.default = default
         self.choices = choices
         self.multiple = multiple
@@ -103,7 +104,7 @@ class ConfigVariable(object):
             # with fallback to the default when conversion fails
             try:
                 value = self.converter(raw_config_value)
-            except Exception, e:
+            except Exception as e:
                 raise ValidationError(
                     self.error_messages['unable_to_process'] % {
                         'exc_type': e.__class__.__name__,
@@ -118,7 +119,7 @@ class ConfigVariable(object):
         """Retrieves multiple values"""
         try:
             iter(raw_config_values)
-        except TypeError, e:
+        except TypeError as e:
             raise ValidationError(
                 self.error_messages['unable_to_process'] % {
                     'exc_type': e.__class__.__name__,
@@ -183,7 +184,7 @@ class ConfigVariable(object):
         for validator in self.validators:
             try:
                 validator(value)
-            except ValidationError, e:
+            except ValidationError as e:
                 if hasattr(e, 'code') and e.code in self.error_messages:
                     message = self.error_messages[e.code]
                     if e.params:

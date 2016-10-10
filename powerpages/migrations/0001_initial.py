@@ -17,18 +17,89 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Page',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('url', models.CharField(max_length=1024, null=True, verbose_name='URL')),
-                ('alias', models.CharField(blank=True, db_index=True, help_text='Unique human-readable codename of page, used in template tags', max_length=120, null=True, verbose_name='Alias')),
-                ('title', models.CharField(blank=True, default=b'', max_length=512, verbose_name='Title')),
-                ('description', models.TextField(blank=True, default=b'', verbose_name='Description')),
-                ('keywords', models.TextField(blank=True, default=b'', verbose_name='Keywords')),
-                ('template', models.TextField(blank=True, default=b'', help_text="Parent's template is used as the base template for current page.", verbose_name='Template')),
-                ('page_processor', powerpages.dbfields.PageProcessorField(default=b'powerpages.DefaultPageProcessor', help_text='Python program used to render this page.', max_length=128, verbose_name='Page Processor')),
-                ('page_processor_config', powerpages.dbfields.PageProcessorConfigField(blank=True, help_text='Advanced page configuration options as YAML config.', null=True, verbose_name='Page Processor Config')),
-                ('is_dirty', models.BooleanField(default=False, editable=False)),
-                ('added_at', models.DateTimeField(auto_now_add=True, verbose_name='Added at')),
-                ('changed_at', models.DateTimeField(auto_now=True, verbose_name='Changed at')),
+                (
+                    'id',
+                    models.AutoField(
+                        auto_created=True, primary_key=True, serialize=False,
+                        verbose_name='ID'
+                    )
+                ),
+                (
+                    'url',
+                    models.CharField(
+                        max_length=1024, null=True, verbose_name='URL'
+                    )
+                ),
+                (
+                    'alias',
+                    models.CharField(
+                        blank=True, db_index=True, help_text=(
+                            'Unique human-readable codename of page, '
+                            'used in template tags'
+                        ), max_length=120, null=True, verbose_name='Alias'
+                    )
+                ),
+                (
+                    'title',
+                    models.CharField(
+                        blank=True, default=b'', max_length=512,
+                        verbose_name='Title'
+                    )
+                ),
+                (
+                    'description',
+                    models.TextField(
+                        blank=True, default=b'', verbose_name='Description'
+                    )
+                ),
+                (
+                    'keywords',
+                    models.TextField(
+                        blank=True, default=b'', verbose_name='Keywords'
+                    )
+                ),
+                (
+                    'template',
+                    models.TextField(
+                        blank=True, default=b'', help_text=(
+                            "Parent's template is used as the base template "
+                            "for current page."
+                        ), verbose_name='Template'
+                    )
+                ),
+                (
+                    'page_processor',
+                    powerpages.dbfields.PageProcessorField(
+                        default=b'powerpages.DefaultPageProcessor',
+                        help_text='Python program used to render this page.',
+                        max_length=128, verbose_name='Page Processor'
+                    )
+                ),
+                (
+                    'page_processor_config',
+                    powerpages.dbfields.PageProcessorConfigField(
+                        blank=True, help_text=(
+                            'Advanced page configuration options '
+                            'as YAML config.'
+                        ), null=True, verbose_name='Page Processor Config'
+                    )
+                ),
+                (
+                    'is_dirty',
+                    models.BooleanField(default=False, editable=False)
+                ),
+                (
+                    'added_at',
+                    models.DateTimeField(
+                        auto_now_add=True, verbose_name='Added at'
+                    )
+                ),
+                (
+                    'changed_at',
+                    models.DateTimeField(
+                        auto_now=True, verbose_name='Changed at'
+                    )
+                ),
             ],
             options={
                 'ordering': ('url',),
