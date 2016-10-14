@@ -1,0 +1,4 @@
+[run]
+source = powerpages
+omit = powerpages/tests/*
+branch = true

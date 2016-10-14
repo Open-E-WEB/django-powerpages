@@ -3,8 +3,11 @@ django-powerpages
 
 .. image:: https://api.travis-ci.org/Open-E-WEB/django-powerpages.svg?branch=master
    :target: https://travis-ci.org/Open-E-WEB/django-powerpages
+.. image:: https://img.shields.io/pypi/v/django-powerpages.svg
+   :target: https://pypi.python.org/pypi/django-powerpages
+.. image:: https://coveralls.io/repos/github/Open-E-WEB/django-powerpages/badge.svg?branch=master
+   :target: https://coveralls.io/github/Open-E-WEB/django-powerpages?branch=master
 
-.. links: pypi, coveralls
 
 Developer-friendly, simple CMS for Django, "flatpages on steroids".
 
@@ -69,6 +72,7 @@ Admin screenshots:
 ~~~~~~~~~~~~~~~~~~
 
 .. image:: powerpages-scr-01.png
+
 .. image:: powerpages-scr-02.png
 
 Synchronization
