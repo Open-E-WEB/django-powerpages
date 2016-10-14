@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from django.conf import settings
 from django.core.urlresolvers import reverse
 
 from powerpages.settings import app_settings

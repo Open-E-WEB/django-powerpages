@@ -18,20 +18,25 @@ from powerpages.sync import (
 )
 
 
+def _file_contents(s, strip_spaces=True):
+    s = s.replace(',\n', ', \n')
+    return s.strip(' ') if strip_spaces else s
+
+
 class BaseSyncTestCase(TestCase):
-    normalized_content = '''{
-  "alias": "test-page", 
-  "description": "At vero eos et accusamus et iusto odio", 
-  "keywords": "lorem ipsum dolor sit amet", 
-  "page_processor": "powerpages.RedirectProcessor", 
+    normalized_content = _file_contents('''{
+  "alias": "test-page",
+  "description": "At vero eos et accusamus et iusto odio",
+  "keywords": "lorem ipsum dolor sit amet",
+  "page_processor": "powerpages.RedirectProcessor",
   "page_processor_config": {
     "to url": "/test/"
-  }, 
+  },
   "title": "De Finibus Bonorum et Malorum"
 }
 ## TEMPLATE SOURCE: ##
 <h1>{{ website_page.title }}</h1>
-    '''.strip(' ')
+    ''')
 
     edited_content = '''
 {
@@ -39,23 +44,23 @@ class BaseSyncTestCase(TestCase):
       "description": "At vero eos et accusamus et iusto odio",
       "title": "De Finibus Bonorum et Malorum",
 
-      "page_processor_config": {"to url": "/test/"}, 
-      "page_processor": "powerpages.RedirectProcessor", 
+      "page_processor_config": {"to url": "/test/"},
+      "page_processor": "powerpages.RedirectProcessor",
       "keywords": "lorem ipsum dolor sit amet"
 }
 ## TEMPLATE SOURCE: ##
 <h1>{{ website_page.title }}</h1>'''
 
-    simple_content = '''{
-  "description": "", 
-  "title": "", 
-  "alias": null, 
-  "page_processor_config": null, 
-  "page_processor": "powerpages.DefaultPageProcessor", 
+    simple_content = _file_contents('''{
+  "description": "",
+  "title": "",
+  "alias": null,
+  "page_processor_config": null,
+  "page_processor": "powerpages.DefaultPageProcessor",
   "keywords": ""
 }
 ## TEMPLATE SOURCE: ##
-    '''.strip(' ')
+    ''')
 
     def setUp(self):
         self.sync_directory = tempfile.mkdtemp()
@@ -164,16 +169,16 @@ class PageFileDumperTestCase(BaseSyncTestCase):
         dumper = PageFileDumper(page)
         self.assertEqual(
             dumper.file_contents(),
-            '''{
-  "alias": null, 
-  "description": "", 
-  "keywords": "", 
-  "page_processor": "powerpages.DefaultPageProcessor", 
-  "page_processor_config": null, 
+            _file_contents('''{
+  "alias": null,
+  "description": "",
+  "keywords": "",
+  "page_processor": "powerpages.DefaultPageProcessor",
+  "page_processor_config": null,
   "title": ""
 }
 ## TEMPLATE SOURCE: ##
-            '''.strip(' ')  # strip trailing spaces
+            ''')
         )
 
     def test_file_contents_full(self):
@@ -192,19 +197,19 @@ class PageFileDumperTestCase(BaseSyncTestCase):
         dumper = PageFileDumper(page)
         self.assertEqual(
             dumper.file_contents(),
-            '''{
-  "alias": "test-page", 
-  "description": "At vero eos et accusamus et iusto odio", 
-  "keywords": "lorem ipsum dolor sit amet", 
-  "page_processor": "powerpages.RedirectProcessor", 
+            _file_contents('''{
+  "alias": "test-page",
+  "description": "At vero eos et accusamus et iusto odio",
+  "keywords": "lorem ipsum dolor sit amet",
+  "page_processor": "powerpages.RedirectProcessor",
   "page_processor_config": {
     "to url": "/test/"
-  }, 
+  },
   "title": "De Finibus Bonorum et Malorum"
 }
 ## TEMPLATE SOURCE: ##
 <h1>{{ website_page.title }}</h1>
-            '''.strip(' ')
+            ''')
         )
 
     def test_file_exists_false(self):
@@ -273,7 +278,9 @@ class PageFileDumperTestCase(BaseSyncTestCase):
         self._test_status_modified(alias='test-page')
 
     def test_status_modified_page_processor(self):
-        self._test_status_modified(page_processor='powerpages.RedirectProcessor')
+        self._test_status_modified(
+            page_processor='powerpages.RedirectProcessor'
+        )
 
     def test_status_modified_page_processor_config(self):
         self._test_status_modified(page_processor_config={'sitemap': False})
@@ -298,19 +305,19 @@ class PageFileDumperTestCase(BaseSyncTestCase):
             file_contents = f.read()
         self.assertEqual(
             file_contents,
-            '''{
-  "alias": "test-page", 
-  "description": "At vero eos et accusamus et iusto odio", 
-  "keywords": "lorem ipsum dolor sit amet", 
-  "page_processor": "powerpages.RedirectProcessor", 
+            _file_contents('''{
+  "alias": "test-page",
+  "description": "At vero eos et accusamus et iusto odio",
+  "keywords": "lorem ipsum dolor sit amet",
+  "page_processor": "powerpages.RedirectProcessor",
   "page_processor_config": {
     "to url": "/test/"
-  }, 
+  },
   "title": "De Finibus Bonorum et Malorum"
 }
 ## TEMPLATE SOURCE: ##
 <h1>{{ website_page.title }}</h1>
-            '''.strip(' ')
+            ''')
         )
 
     def test_save_is_dirty(self):
@@ -358,19 +365,19 @@ class PageFileDumperTestCase(BaseSyncTestCase):
         dumper = PageFileDumper(page)
         self.assertEqual(
             dumper.diff(),
-            '''--- Current content
+            _file_contents('''--- Current content
 
 +++ Coming changes
 
 @@ -4,6 +4,6 @@
 
-   "keywords": "", 
-   "page_processor": "powerpages.DefaultPageProcessor", 
-   "page_processor_config": null, 
+   "keywords": "",
+   "page_processor": "powerpages.DefaultPageProcessor",
+   "page_processor_config": null,
 -  "title": "TEST"
 +  "title": "CHANGE"
  }
- ## TEMPLATE SOURCE: ##'''
+ ## TEMPLATE SOURCE: ##''')
         )
 
 
@@ -502,7 +509,9 @@ class PageFileLoaderTestCase(BaseSyncTestCase):
         self._test_status_modified(alias='test-page-2')
 
     def test_status_modified_page_processor(self):
-        self._test_status_modified(page_processor='powerpages.NotFoundProcessor')
+        self._test_status_modified(
+            page_processor='powerpages.NotFoundProcessor'
+        )
 
     def test_status_modified_page_processor_config(self):
         self._test_status_modified(page_processor_config={'sitemap': False})
@@ -517,7 +526,7 @@ class PageFileLoaderTestCase(BaseSyncTestCase):
         loader = FilePageLoader(path)
         self.assertEqual(
             loader.diff(),
-            '''--- Current content
+            _file_contents('''--- Current content
 
 +++ Coming changes
 
@@ -527,7 +536,7 @@ class PageFileLoaderTestCase(BaseSyncTestCase):
  }
  ## TEMPLATE SOURCE: ##
 -TEST
-+<h1>{{ website_page.title }}</h1>'''
++<h1>{{ website_page.title }}</h1>''')
         )
 
     def test_diff_title_modified(self):
@@ -540,7 +549,7 @@ class PageFileLoaderTestCase(BaseSyncTestCase):
         loader = FilePageLoader(path)
         self.assertEqual(
             loader.diff(),
-            '''--- Current content
+            _file_contents('''--- Current content
 
 +++ Coming changes
 
@@ -548,12 +557,12 @@ class PageFileLoaderTestCase(BaseSyncTestCase):
 
    "page_processor_config": {
      "to url": "/test/"
-   }, 
+   },
 -  "title": "CHANGE"
 +  "title": "De Finibus Bonorum et Malorum"
  }
  ## TEMPLATE SOURCE: ##
- <h1>{{ website_page.title }}</h1>'''
+ <h1>{{ website_page.title }}</h1>''')
         )
 
 
@@ -594,19 +603,19 @@ class WebsiteDumpOperationTestCase(BaseSyncTestCase):
             file_contents = f.read()
         self.assertEqual(
             file_contents,
-            '''{
-  "alias": "test-page", 
-  "description": "At vero eos et accusamus et iusto odio", 
-  "keywords": "lorem ipsum dolor sit amet", 
-  "page_processor": "powerpages.RedirectProcessor", 
+            _file_contents('''{
+  "alias": "test-page",
+  "description": "At vero eos et accusamus et iusto odio",
+  "keywords": "lorem ipsum dolor sit amet",
+  "page_processor": "powerpages.RedirectProcessor",
   "page_processor_config": {
     "to url": "/test/"
-  }, 
+  },
   "title": "De Finibus Bonorum et Malorum"
 }
 ## TEMPLATE SOURCE: ##
 <h1>{{ website_page.title }}</h1>
-            '''.strip(' ')
+            ''')
         )
         output = stdout.getvalue()
         # Check stdout:
@@ -654,19 +663,19 @@ class WebsiteDumpOperationTestCase(BaseSyncTestCase):
             file_contents = f.read()
         self.assertEqual(
             file_contents,
-            '''{
-  "alias": "test-page", 
-  "description": "At vero eos et accusamus et iusto odio", 
-  "keywords": "lorem ipsum dolor sit amet", 
-  "page_processor": "powerpages.RedirectProcessor", 
+            _file_contents('''{
+  "alias": "test-page",
+  "description": "At vero eos et accusamus et iusto odio",
+  "keywords": "lorem ipsum dolor sit amet",
+  "page_processor": "powerpages.RedirectProcessor",
   "page_processor_config": {
     "to url": "/test/"
-  }, 
+  },
   "title": "CHANGE!"
 }
 ## TEMPLATE SOURCE: ##
 <h1>{{ website_page.title }}</h1>
-            '''.strip(' ')
+            ''')
         )
         output = stdout.getvalue()
         # Check stdout:
@@ -738,19 +747,19 @@ class WebsiteLoadOperationTestCase(BaseSyncTestCase):
 
         self._make_file(
             'test.page',
-            '''{
-  "alias": "test-page", 
-  "description": "At vero eos et accusamus et iusto odio", 
-  "keywords": "lorem ipsum dolor sit amet", 
-  "page_processor": "powerpages.RedirectProcessor", 
+            _file_contents('''{
+  "alias": "test-page",
+  "description": "At vero eos et accusamus et iusto odio",
+  "keywords": "lorem ipsum dolor sit amet",
+  "page_processor": "powerpages.RedirectProcessor",
   "page_processor_config": {
     "to url": "/test/"
-  }, 
+  },
   "title": "De Finibus Bonorum et Malorum"
 }
 ## TEMPLATE SOURCE: ##
 <h1>{{ website_page.title }}</h1>
-            '''.strip(' '),
+            '''),
             make_dirs=False
         )
 
@@ -812,19 +821,19 @@ class WebsiteLoadOperationTestCase(BaseSyncTestCase):
         )
         self._make_file(
             'test.page',
-            '''{
-  "alias": "test-page", 
-  "description": "At vero eos et accusamus et iusto odio", 
-  "keywords": "lorem ipsum dolor sit amet", 
-  "page_processor": "powerpages.RedirectProcessor", 
+            _file_contents('''{
+  "alias": "test-page",
+  "description": "At vero eos et accusamus et iusto odio",
+  "keywords": "lorem ipsum dolor sit amet",
+  "page_processor": "powerpages.RedirectProcessor",
   "page_processor_config": {
     "to url": "/test/"
-  }, 
+  },
   "title": "TEST"
 }
 ## TEMPLATE SOURCE: ##
 <h1>CHANGE</h1>
-            '''.strip(' '),
+            '''),
             make_dirs=False
         )
 

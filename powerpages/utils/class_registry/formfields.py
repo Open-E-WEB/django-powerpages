@@ -13,7 +13,8 @@ class BaseRegistryItemChoiceField(ChoiceField):
 
     def __init__(self, choices=(), *args, **kwargs):
         kwargs.pop('max_length', None)
-        choices = self.registry_instance.as_choices()
+        # pass choices as callable to defer evaluation:
+        choices = self.registry_instance.as_choices
         super(BaseRegistryItemChoiceField, self).__init__(
             choices, *args, **kwargs
         )

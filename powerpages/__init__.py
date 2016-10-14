@@ -17,7 +17,7 @@ def autodiscover():
 
     from django.conf import settings
     from django.utils.module_loading import module_has_submodule
-    import powerpages.page_processor_registry
+    from powerpages import page_processor_registry
 
     for app in settings.INSTALLED_APPS:
         mod = import_module(app)

@@ -219,7 +219,8 @@ sitemap settings: `changefreq`, `lastmod`, `priority`.
 
     def get_extends_tag(self):
         """
-        Prepares {% extends %} tag included at the beginning of template source.
+        Prepares {% extends %} tag included
+        at the beginning of template source.
         """
         base_template = self.config.get('base template')
         parent_page = self.page.parent()
@@ -246,7 +247,9 @@ sitemap settings: `changefreq`, `lastmod`, `priority`.
 
     def get_template_source(self):
         """Prepare template source"""
-        return self.get_extends_tag() + self.get_load_tag() + self.page.template
+        return (
+            self.get_extends_tag() + self.get_load_tag() + self.page.template
+        )
 
     def is_accessible(self):
         """Determines if Page can be accessed on URL using this processor"""

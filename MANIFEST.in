@@ -1,4 +1,6 @@
 include LICENSE
 include README.rst
+include powerpages-scr-01.png
+include powerpages-scr-02.png
 recursive-include powerpages/static *
 recursive-include powerpages/templates *

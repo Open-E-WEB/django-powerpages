@@ -261,4 +261,3 @@ def show_info(message):
         _thread_locals.console = Console()
     console = _thread_locals.console
     console.info(message)
-

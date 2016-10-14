@@ -23,13 +23,6 @@ class PageAdminForm(forms.ModelForm):
             'template': SourceCodeEditor,
         }
 
-    # Model instance fields to override using cleaned data
-    # during template validation:
-    OVERRIDE_FIELDS = (
-        'template', 'page_processor', 'page_processor_config',
-        'alias', 'url'
-    )
-
     def clean_alias(self):
         """
         Force alias to be null instead of empty string
@@ -63,34 +56,34 @@ class PageAdminForm(forms.ModelForm):
                 value = yaml.load(value)
             except ValueError:
                 raise forms.ValidationError('Invalid YAML config.')
+            else:
+                if not isinstance(value, dict):
+                    raise forms.ValidationError('Invalid YAML config.')
         return value
 
     def clean(self):
         """Check validity of a Page template"""
-        instance = self.instance
         cleaned_data = self.cleaned_data
-        normalized_data = \
-            cleaned_data.update(normalize_page_fields(cleaned_data))
-        template = normalized_data['template']
-
-        # we have to put changed "template" field value to the instance
-        # to validate current content, not the old one
-        if template:
-            # Copy original attributes for further restoring:
-            original_attrs = {}
-            for field_name in self.OVERRIDE_FIELDS:
-                original_attrs[field_name] = getattr(instance, field_name)
-                setattr(instance, field_name, normalized_data.get(field_name))
-            # Do the validation
-            request_factory = RequestFactory()
-            request = request_factory.get(instance.url)
-            request.session = {}
-            request.user = AnonymousUser()
-            try:
-                processor = instance.get_page_processor()
-                processor.validate(request=request)
-            finally:
-                # Restore instance to state existing before the validation:
-                for field_name in self.OVERRIDE_FIELDS:
-                    setattr(instance, field_name, original_attrs[field_name])
+        if self._errors:
+            return cleaned_data
+        instance = self.instance
+        normalized_data = cleaned_data.copy()
+        normalized_data.update(normalize_page_fields(cleaned_data))
+        # Copy original attributes for further restoring:
+        original_attrs = {}
+        for name, value in normalized_data.items():
+            original_attrs[name] = getattr(instance, name)
+            setattr(instance, name, value)
+        # Do the validation
+        request_factory = RequestFactory()
+        request = request_factory.get(instance.url)
+        request.session = {}
+        request.user = AnonymousUser()
+        try:
+            processor = instance.get_page_processor()
+            processor.validate(request=request)
+        finally:
+            # Restore instance to state existing before the validation:
+            for name, value in original_attrs.items():
+                setattr(instance, name, value)
         return normalized_data
