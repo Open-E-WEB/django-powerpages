@@ -107,9 +107,9 @@ class PageFormTestCase(TestCase):
             'description': 'At vero eos et accusamus et iusto odio\n\n',
             'keywords': '   lorem ipsum dolor sit amet',
             'page_processor': 'powerpages.RedirectProcessor',
-            'page_processor_config': {
+            'page_processor_config': yaml.dump({
                 'to url': '/test/'
-            },
+            }),
             'template': '\n\t<h1>{{ website_page.title }}</h1>\n   \n\n\r\n',
             'title': '  De Finibus Bonorum et Malorum  \t'
         }
@@ -138,9 +138,9 @@ class PageFormTestCase(TestCase):
             'description': 'At vero eos et accusamus et iusto odio',
             'keywords': 'lorem ipsum dolor sit amet',
             'page_processor': 'powerpages.RedirectProcessor',
-            'page_processor_config': {
+            'page_processor_config': yaml.dump({
                 'to name': 'not-existing-url'
-            },
+            }),
             'template': '<h1>{{ website_page.title }}</h1>\n',
             'title': 'De Finibus Bonorum et Malorum'
         }
@@ -156,9 +156,9 @@ class PageFormTestCase(TestCase):
             'description': 'At vero eos et accusamus et iusto odio',
             'keywords': 'lorem ipsum dolor sit amet',
             'page_processor': 'powerpages.DefaultPageProcessor',
-            'page_processor_config': {
+            'page_processor_config': yaml.dump({
                 'base template': "this-template-does-not-exist.html"
-            },
+            }),
             'template': '<h1>{{ website_page.title }}</h1>\n',
             'title': 'De Finibus Bonorum et Malorum'
         }
@@ -191,7 +191,7 @@ class PageFormTestCase(TestCase):
             'description': 'At vero eos et accusamus et iusto odio',
             'keywords': 'lorem ipsum dolor sit amet',
             'page_processor': 'powerpages.DefaultPageProcessor',
-            'page_processor_config': {},
+            'page_processor_config': '',
             'template': '<h1>{{ website_page.title }}</h1>\n',
             'title': 'De Finibus Bonorum et Malorum'
         }
