@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
+
 import yaml
 
 from django.test import TestCase
@@ -144,7 +146,7 @@ class PageFormTestCase(TestCase):
         }
         form = PageAdminForm(data, instance=Page())
         self.assertFalse(form.is_valid())
-        self.assertEqual(form.errors.keys(), ['__all__'])
+        self.assertEqual(list(form.errors.keys()), ['__all__'])
 
     def test_invalid_form_data_unknown_parent_template(self):
         # No parent page
@@ -162,7 +164,7 @@ class PageFormTestCase(TestCase):
         }
         form = PageAdminForm(data, instance=Page())
         self.assertFalse(form.is_valid())
-        self.assertEqual(form.errors.keys(), ['__all__'])
+        self.assertEqual(list(form.errors.keys()), ['__all__'])
 
     def test_invalid_form_data_missing_url(self):
         # No parent page
@@ -178,7 +180,7 @@ class PageFormTestCase(TestCase):
         }
         form = PageAdminForm(data, instance=Page())
         self.assertFalse(form.is_valid())
-        self.assertEqual(form.errors.keys(), ['url'])
+        self.assertEqual(list(form.errors.keys()), ['url'])
 
     def test_invalid_form_data_duplicate_alias(self):
         Page.objects.create(url='/')
@@ -195,7 +197,7 @@ class PageFormTestCase(TestCase):
         }
         form = PageAdminForm(data, instance=Page())
         self.assertFalse(form.is_valid())
-        self.assertEqual(form.errors.keys(), ['alias'])
+        self.assertEqual(list(form.errors.keys()), ['alias'])
 
     def test_invalid_form_data_malformed_yaml(self):
         data = {
@@ -210,4 +212,4 @@ class PageFormTestCase(TestCase):
         }
         form = PageAdminForm(data, instance=Page())
         self.assertFalse(form.is_valid())
-        self.assertEqual(form.errors.keys(), ['page_processor_config'])
+        self.assertEqual(list(form.errors.keys()), ['page_processor_config'])

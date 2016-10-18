@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from  __future__ import unicode_literals
+
 from django.test import TestCase
 from django.contrib.auth.models import User
 
@@ -12,55 +14,59 @@ from .test_sync import BaseSyncTestCase
 
 class WebsiteLinkTestCase(TestCase):
 
+    maxDiff = None
+
     def test_no_object(self):
         self.assertIsNone(website_link(None))
 
     def test_empty_url(self):
         self.assertEqual(
             website_link(Page(url='')),
-            u'<a href="" style="font-weight: normal;"> &raquo;</a>'
+            '<a href="" style="font-weight: normal;"> &raquo;</a>'
         )
 
     def test_root_url(self):
         self.assertEqual(
             website_link(Page(url='/')),
-            u'<a href="/" style="font-weight: normal;">/ &raquo;</a>'
+            '<a href="/" style="font-weight: normal;">/ &raquo;</a>'
         )
 
     def test_first_level_url(self):
         self.assertEqual(
             website_link(Page(url='/test/')),
-            u'<a href="/test/" style="font-weight: normal;">'
-            u'/<span style="font-weight: bold">test</span>/'
-            u' &raquo;</a>'
+            '<a href="/test/" style="font-weight: normal;">'
+            '/<span style="font-weight: bold">test</span>/'
+            ' &raquo;</a>'
         )
 
     def test_second_level_url(self):
         self.assertEqual(
             website_link(Page(url='/nested/test/')),
-            u'<a href="/nested/test/" style="font-weight: normal;">'
-            u'/nested/<span style="font-weight: bold">test</span>/'
-            u' &raquo;</a>'
+            '<a href="/nested/test/" style="font-weight: normal;">'
+            '/nested/<span style="font-weight: bold">test</span>/'
+            ' &raquo;</a>'
         )
 
     def test_file(self):
         self.assertEqual(
             website_link(Page(url='/robots.txt')),
-            u'<a href="/robots.txt" style="font-weight: normal;">'
-            u'/<span style="font-weight: bold">robots.txt</span>'
-            u' &raquo;</a>'
+            '<a href="/robots.txt" style="font-weight: normal;">'
+            '/<span style="font-weight: bold">robots.txt</span>'
+            ' &raquo;</a>'
         )
 
     def test_nested_file(self):
         self.assertEqual(
             website_link(Page(url='/nested/robots.txt')),
-            u'<a href="/nested/robots.txt" style="font-weight: normal;">'
-            u'/nested/<span style="font-weight: bold">robots.txt</span>'
-            u' &raquo;</a>'
+            '<a href="/nested/robots.txt" style="font-weight: normal;">'
+            '/nested/<span style="font-weight: bold">robots.txt</span>'
+            ' &raquo;</a>'
         )
 
 
 class SyncStatusTestCase(BaseSyncTestCase):
+
+    maxDiff = None
 
     def test_no_object(self):
         self.assertIsNone(sync_status(None))
@@ -72,7 +78,7 @@ class SyncStatusTestCase(BaseSyncTestCase):
         PageFileDumper(page).save()
         self.assertEqual(
             sync_status(page),
-            u'<span style="color: green">File is synced</span>'
+            '<span style="color: green">File is synced</span>'
         )
 
     def test_file_content_differs(self):
@@ -80,11 +86,11 @@ class SyncStatusTestCase(BaseSyncTestCase):
             url='/test-page/', template='<h1>Test Page</h1>'
         )
         PageFileDumper(page).save()
-        page.title = u"Lorem Ipsum"
+        page.title = 'Lorem Ipsum'
         page.save()
         self.assertEqual(
             sync_status(page),
-            u'<span style="color: orange">File content differs</span>'
+            '<span style="color: orange">File content differs</span>'
         )
 
     def test_file_is_missing(self):
@@ -93,7 +99,7 @@ class SyncStatusTestCase(BaseSyncTestCase):
         )
         self.assertEqual(
             sync_status(page),
-            u'<span style="color: red">File is missing</span>'
+            '<span style="color: red">File is missing</span>'
         )
 
     def test_file_content_differs_modified_in_admin(self):
@@ -101,18 +107,20 @@ class SyncStatusTestCase(BaseSyncTestCase):
             url='/test-page/', template='<h1>Test Page</h1>'
         )
         PageFileDumper(page).save()
-        page.title = u"Lorem Ipsum"
+        page.title = 'Lorem Ipsum'
         page.is_dirty = True  # modified in Admin
         page.save()
         self.assertEqual(
             sync_status(page),
-            u'<span style="color:black; font-weight:bold">'
-            u'Changed in Admin!</span><br>'
-            u'<span style="color: orange">File content differs</span>'
+            '<span style="color:black; font-weight:bold">'
+            'Changed in Admin!</span><br>'
+            '<span style="color: orange">File content differs</span>'
         )
 
 
 class SavePageTestCase(TestCase):
+
+    maxDiff = None
 
     def setUp(self):
 

@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
+
+from django.utils import six
 from django.test import TestCase
 from django.core.urlresolvers import reverse
 
@@ -8,13 +11,15 @@ from powerpages.models import Page
 
 class PageModelTestCase(TestCase):
 
-    # def __unicode__(self):
+    maxDiff = None
+
+    # def __unicode__(self): / __str__(self):
 
     def test_unicode(self):
         page = Page.objects.create(
             url='/test/',
         )
-        self.assertEqual(unicode(page), '/test/')
+        self.assertEqual(six.text_type(page), '/test/')
 
     # def get_absolute_url(self):
 

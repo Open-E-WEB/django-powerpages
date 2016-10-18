@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 
-import difflib
-from cStringIO import StringIO
+from __future__ import unicode_literals
 
+import difflib
+
+from django.utils.six import StringIO
 from django.utils.html import escape
 
 
@@ -21,17 +23,17 @@ class Diff(object):
 
     def left(self, content, created_at):
         """Creates DiffSide objects and sets it as left side"""
-        self.left_side = DiffSide("Old", content, created_at)
+        self.left_side = DiffSide('Old', content, created_at)
 
     def right(self, content, created_at):
         """Creates DiffSide objects and sets it as right side"""
-        self.right_side = DiffSide("New", content, created_at)
+        self.right_side = DiffSide('New', content, created_at)
 
     def html_diff(self):
         """Creates unified diff as HTML"""
         if not (self.left_side and self.right_side):
             raise RuntimeError(
-                "Both sides of diff must be set before calling html_diff"
+                'Both sides of diff must be set before calling html_diff'
             )
         diff_gen = difflib.unified_diff(
             self.left_side.content, self.right_side.content,
@@ -46,13 +48,13 @@ class Diff(object):
                 change, char = line
                 change_class = self.CHANGE_CLASSES[change]
                 if change_class:
-                    marked_line = u'<span class="%s">%s</span>' % (
+                    marked_line = '<span class="{0}">{1}</span>'.format(
                         change_class, escape(char)
                     )
                 else:
                     marked_line = escape(char)
             else:
-                marked_line = u'\n<span class="diff-info">%s</span>\n' % (
+                marked_line = '\n<span class="diff-info">{0}</span>\n'.format(
                     escape(line[:-2]),
                 )
             output.write(marked_line.encode('utf-8'))
@@ -69,4 +71,4 @@ class DiffSide(object):
 
     def datetime_as_string(self):
         """Converts creation datetime to ISO 8601 string."""
-        return self.created_at.strftime("%Y-%m-%d %H:%M:%S")
+        return self.created_at.strftime('%Y-%m-%d %H:%M:%S')

@@ -6,8 +6,8 @@ import os
 import tempfile
 import shutil
 import codecs
-import StringIO
 
+from django.utils.six import StringIO
 from django.test import TestCase
 from django.test.utils import override_settings
 
@@ -19,11 +19,13 @@ from powerpages.sync import (
 
 
 def _file_contents(s, strip_spaces=True):
-    s = s.replace(',\n', ', \n')
     return s.strip(' ') if strip_spaces else s
 
 
 class BaseSyncTestCase(TestCase):
+
+    maxDiff = None
+
     normalized_content = _file_contents('''{
   "alias": "test-page",
   "description": "At vero eos et accusamus et iusto odio",
@@ -581,8 +583,8 @@ class WebsiteDumpOperationTestCase(BaseSyncTestCase):
             template='<h1>{{ website_page.title }}</h1>\n',
             title='De Finibus Bonorum et Malorum',
         )
-        stdout = StringIO.StringIO()
-        stderr = StringIO.StringIO()
+        stdout = StringIO()
+        stderr = StringIO()
         operation = WebsiteDumpOperation(
             root_url='/a/b/test/',
             stdout=stdout,
@@ -641,8 +643,8 @@ class WebsiteDumpOperationTestCase(BaseSyncTestCase):
         PageFileDumper(page).save()  # file is created
         page.title = "CHANGE!"
         page.save()
-        stdout = StringIO.StringIO()
-        stderr = StringIO.StringIO()
+        stdout = StringIO()
+        stderr = StringIO()
         operation = WebsiteDumpOperation(
             root_url='/a/b/test/',
             stdout=stdout,
@@ -708,8 +710,8 @@ class WebsiteDumpOperationTestCase(BaseSyncTestCase):
         )
         PageFileDumper(page).save()  # file is created
         page.delete()
-        stdout = StringIO.StringIO()
-        stderr = StringIO.StringIO()
+        stdout = StringIO()
+        stderr = StringIO()
         operation = WebsiteDumpOperation(
             root_url='/',
             stdout=stdout,
@@ -763,8 +765,8 @@ class WebsiteLoadOperationTestCase(BaseSyncTestCase):
             make_dirs=False
         )
 
-        stdout = StringIO.StringIO()
-        stderr = StringIO.StringIO()
+        stdout = StringIO()
+        stderr = StringIO()
         operation = WebsiteLoadOperation(
             root_url='/',
             stdout=stdout,
@@ -837,8 +839,8 @@ class WebsiteLoadOperationTestCase(BaseSyncTestCase):
             make_dirs=False
         )
 
-        stdout = StringIO.StringIO()
-        stderr = StringIO.StringIO()
+        stdout = StringIO()
+        stderr = StringIO()
         operation = WebsiteLoadOperation(
             root_url='/',
             stdout=stdout,
@@ -895,8 +897,8 @@ class WebsiteLoadOperationTestCase(BaseSyncTestCase):
         )
         # no file!
 
-        stdout = StringIO.StringIO()
-        stderr = StringIO.StringIO()
+        stdout = StringIO()
+        stderr = StringIO()
         operation = WebsiteLoadOperation(
             root_url='/',
             stdout=stdout,

@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
+
 from powerpages.utils.class_registry.dbfields import (
     BaseRegistryItemField, BaseRegistryItemConfigField
 )

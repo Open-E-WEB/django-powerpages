@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
+
 from django.test import TestCase
 from django.test.utils import override_settings
 from django.core.cache import cache
@@ -9,6 +11,8 @@ from powerpages import cachekeys
 
 
 class PageViewTestCase(TestCase):
+
+    maxDiff = None
 
     # Default Processor:
 

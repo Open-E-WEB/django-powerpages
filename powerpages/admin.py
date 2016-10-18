@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
+
 from django.utils.safestring import mark_safe
 from django.contrib import admin
 
@@ -21,14 +23,14 @@ def website_link(page):
         for i in (-1, -2):
             if url_parts[i]:
                 url_parts[i] = \
-                    u'<span style="font-weight: bold">{0}</span>'.format(
+                    '<span style="font-weight: bold">{0}</span>'.format(
                         url_parts[i]
                     )
                 break
-        styled_url = u'/'.join(url_parts)
+        styled_url = '/'.join(url_parts)
     return mark_safe(
-        u'<a href="{url}" style="font-weight: normal;">{text}</a>'.format(
-            url=url, text=u'{url} &raquo;'.format(url=styled_url)
+        '<a href="{url}" style="font-weight: normal;">{text}</a>'.format(
+            url=url, text='{url} &raquo;'.format(url=styled_url)
         )
     )
 
@@ -40,29 +42,29 @@ def sync_status(page):
     status_parts = []
     if page.is_dirty:
         status_parts.append(
-            u'<span style="color:black; font-weight:bold">'
-            u'Changed in Admin!'
-            u'</span>'
+            '<span style="color:black; font-weight:bold">'
+            'Changed in Admin!'
+            '</span>'
         )
     dump_status = PageFileDumper(page).status()
     if dump_status == SyncStatus.NO_CHANGES:
-        dump_text = u'File is synced'
-        dump_color = u'green'
+        dump_text = 'File is synced'
+        dump_color = 'green'
     elif dump_status == SyncStatus.MODIFIED:
-        dump_text = u'File content differs'
-        dump_color = u'orange'
+        dump_text = 'File content differs'
+        dump_color = 'orange'
     elif dump_status == SyncStatus.ADDED:
-        dump_text = u'File is missing'
-        dump_color = u'red'
+        dump_text = 'File is missing'
+        dump_color = 'red'
     else:  # Unknown sync status
-        dump_text = u'?'
-        dump_color = u'black'
+        dump_text = '?'
+        dump_color = 'black'
     status_parts.append(
-        u'<span style="color: {0}">{1}</span>'.format(
+        '<span style="color: {0}">{1}</span>'.format(
             dump_color, dump_text
         )
     )
-    return mark_safe(u'<br>'.join(status_parts))
+    return mark_safe('<br>'.join(status_parts))
 
 
 def save_page(page, user, created):
@@ -122,13 +124,13 @@ class PageAdmin(admin.ModelAdmin):
 
     def get_website_link(self, obj=None):
         return website_link(obj)
-    get_website_link.short_description = u"URL"
+    get_website_link.short_description = "URL"
     get_website_link.admin_order_field = 'url'
     get_website_link.allow_tags = True
 
     def get_sync_status(self, obj=None):
         return sync_status(obj)
-    get_sync_status.short_description = u"Sync Status"
+    get_sync_status.short_description = "Sync Status"
     get_sync_status.allow_tags = True
 
     def save_model(self, request, obj, form, change):

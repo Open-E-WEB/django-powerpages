@@ -1,9 +1,14 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
+
 import datetime
+
+from django.utils import six
 
 from powerpages import sitemap_config
 from powerpages.models import Page
+
 
 VALID_CHANGEFREQ = (
     '', 'always', 'hourly', 'daily', 'weekly', 'monthly', 'yearly', 'never',
@@ -24,7 +29,8 @@ class PageSitemap(sitemap_config.Sitemap):
                 if 'lastmod' in sitemap_settings:
                     try:
                         lastmod = datetime.datetime.strptime(
-                            unicode(sitemap_settings['lastmod']), '%Y-%m-%d'
+                            six.text_type(sitemap_settings['lastmod']),
+                            '%Y-%m-%d'
                         )
                     except ValueError:
                         pass

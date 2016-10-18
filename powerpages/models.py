@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
+
 from django.core.cache import cache
 from django.dispatch import receiver
 from django.db import models
+from django.utils.encoding import python_2_unicode_compatible
 
 from powerpages.settings import app_settings
 from powerpages.utils.attribute_cache import cache_result_on
@@ -53,62 +56,63 @@ class PageURLCache(object):
 
 # Models:
 
+@python_2_unicode_compatible
 class Page(models.Model):
     """Webpages and templates."""
 
     class Meta:
-        verbose_name = u"Page"
-        verbose_name_plural = u"Pages"
+        verbose_name = 'Page'
+        verbose_name_plural = 'Pages'
         ordering = ('url',)
 
     # Identity:
     url = models.CharField(
-        verbose_name=u"URL", max_length=1024, null=True
+        verbose_name='URL', max_length=1024, null=True
     )
     alias = models.CharField(
-        verbose_name=u"Alias", max_length=120, db_index=True,
+        verbose_name='Alias', max_length=120, db_index=True,
         null=True, blank=True,
-        help_text=u"Unique human-readable codename of page, "
-                  u"used in template tags"
+        help_text='Unique human-readable codename of page, '
+                  'used in template tags'
     )
     # Meta tags:
     title = models.CharField(
-        max_length=512, verbose_name=u"Title", blank=True, default=""
+        max_length=512, verbose_name='Title', blank=True, default=""
     )
     description = models.TextField(
-        verbose_name=u"Description", blank=True, default=""
+        verbose_name='Description', blank=True, default=""
     )
     keywords = models.TextField(
-        verbose_name=u"Keywords", blank=True, default=""
+        verbose_name='Keywords', blank=True, default=""
     )
     # Template:
     template = models.TextField(
-        verbose_name=u"Template",
+        verbose_name='Template',
         blank=True, default='',
-        help_text=u"Parent's template is used as the base template for "
-                  u"current page."
+        help_text="Parent's template is used as the base template for "
+                  "current page."
     )
     # Page processing
     page_processor = PageProcessorField(
-        verbose_name=u"Page Processor", max_length=128,
+        verbose_name='Page Processor', max_length=128,
         default='powerpages.DefaultPageProcessor',
-        help_text=u"Python program used to render this page."
+        help_text='Python program used to render this page.'
     )
     page_processor_config = PageProcessorConfigField(
-        verbose_name=u"Page Processor Config", null=True, blank=True,
-        help_text=u"Advanced page configuration options as YAML config."
+        verbose_name='Page Processor Config', null=True, blank=True,
+        help_text='Advanced page configuration options as YAML config.'
     )
     # Indicates objects saved in Admin:
     is_dirty = models.BooleanField(default=False, editable=False)
     # Change info fields:
     added_at = models.DateTimeField(
-        verbose_name=u"Added at", auto_now_add=True
+        verbose_name='Added at', auto_now_add=True
     )
     changed_at = models.DateTimeField(
-        verbose_name=u"Changed at", auto_now=True
+        verbose_name='Changed at', auto_now=True
     )
 
-    def __unicode__(self):
+    def __str__(self):
         """URL"""
         return self.url
 
