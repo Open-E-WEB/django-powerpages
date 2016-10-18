@@ -42,7 +42,7 @@ class DjangoCommand(Command):
                     'ENGINE': 'django.db.backends.sqlite3'
                 }
             },
-            # TODO: MIDDLEWARE for 1.10
+            # TODO: MIDDLEWARE for Django > 1.10
             MIDDLEWARE_CLASSES=(
                 'django.middleware.security.SecurityMiddleware',
                 'django.contrib.sessions.middleware.SessionMiddleware',
@@ -121,6 +121,7 @@ setup(
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Framework :: Django :: 1.9',
+        'Framework :: Django :: 1.10',
         'Topic :: Internet :: WWW/HTTP',
     ],
     keywords='django cms web',
