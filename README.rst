@@ -120,6 +120,6 @@ For the full list of options, use ``--help``.
 Requirements
 ------------
 
-Python: 2.7
+Python: 2.7, 3.4, 3.5
 
 Django: 1.9
