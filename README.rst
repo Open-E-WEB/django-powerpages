@@ -122,4 +122,4 @@ Requirements
 
 Python: 2.7, 3.4, 3.5
 
-Django: 1.9
+Django: 1.9, 1.10

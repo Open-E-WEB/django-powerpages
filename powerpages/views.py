@@ -51,8 +51,8 @@ def sitemap(request):
     if sitemap_content is None:
         sitemap_content = render_to_string(
             'powerpages/sitemap.xml',
-            {'urlset': sitemap_config.sitemaps.urls(request)},
-            context_instance=RequestContext(request)
+            context={'urlset': sitemap_config.sitemaps.urls(request)},
+            request=request
         )
         cache.get(cachekeys.SITEMAP_CONTENT, sitemap_content)
     return http.HttpResponse(sitemap_content, content_type='application/xml')
