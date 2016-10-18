@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
+
 import yaml
 
 from django.test import TestCase
@@ -105,9 +107,9 @@ class PageFormTestCase(TestCase):
             'description': 'At vero eos et accusamus et iusto odio\n\n',
             'keywords': '   lorem ipsum dolor sit amet',
             'page_processor': 'powerpages.RedirectProcessor',
-            'page_processor_config': {
+            'page_processor_config': yaml.dump({
                 'to url': '/test/'
-            },
+            }),
             'template': '\n\t<h1>{{ website_page.title }}</h1>\n   \n\n\r\n',
             'title': '  De Finibus Bonorum et Malorum  \t'
         }
@@ -136,15 +138,15 @@ class PageFormTestCase(TestCase):
             'description': 'At vero eos et accusamus et iusto odio',
             'keywords': 'lorem ipsum dolor sit amet',
             'page_processor': 'powerpages.RedirectProcessor',
-            'page_processor_config': {
+            'page_processor_config': yaml.dump({
                 'to name': 'not-existing-url'
-            },
+            }),
             'template': '<h1>{{ website_page.title }}</h1>\n',
             'title': 'De Finibus Bonorum et Malorum'
         }
         form = PageAdminForm(data, instance=Page())
         self.assertFalse(form.is_valid())
-        self.assertEqual(form.errors.keys(), ['__all__'])
+        self.assertEqual(list(form.errors.keys()), ['__all__'])
 
     def test_invalid_form_data_unknown_parent_template(self):
         # No parent page
@@ -154,15 +156,15 @@ class PageFormTestCase(TestCase):
             'description': 'At vero eos et accusamus et iusto odio',
             'keywords': 'lorem ipsum dolor sit amet',
             'page_processor': 'powerpages.DefaultPageProcessor',
-            'page_processor_config': {
+            'page_processor_config': yaml.dump({
                 'base template': "this-template-does-not-exist.html"
-            },
+            }),
             'template': '<h1>{{ website_page.title }}</h1>\n',
             'title': 'De Finibus Bonorum et Malorum'
         }
         form = PageAdminForm(data, instance=Page())
         self.assertFalse(form.is_valid())
-        self.assertEqual(form.errors.keys(), ['__all__'])
+        self.assertEqual(list(form.errors.keys()), ['__all__'])
 
     def test_invalid_form_data_missing_url(self):
         # No parent page
@@ -178,7 +180,7 @@ class PageFormTestCase(TestCase):
         }
         form = PageAdminForm(data, instance=Page())
         self.assertFalse(form.is_valid())
-        self.assertEqual(form.errors.keys(), ['url'])
+        self.assertEqual(list(form.errors.keys()), ['url'])
 
     def test_invalid_form_data_duplicate_alias(self):
         Page.objects.create(url='/')
@@ -189,13 +191,13 @@ class PageFormTestCase(TestCase):
             'description': 'At vero eos et accusamus et iusto odio',
             'keywords': 'lorem ipsum dolor sit amet',
             'page_processor': 'powerpages.DefaultPageProcessor',
-            'page_processor_config': {},
+            'page_processor_config': '',
             'template': '<h1>{{ website_page.title }}</h1>\n',
             'title': 'De Finibus Bonorum et Malorum'
         }
         form = PageAdminForm(data, instance=Page())
         self.assertFalse(form.is_valid())
-        self.assertEqual(form.errors.keys(), ['alias'])
+        self.assertEqual(list(form.errors.keys()), ['alias'])
 
     def test_invalid_form_data_malformed_yaml(self):
         data = {
@@ -210,4 +212,4 @@ class PageFormTestCase(TestCase):
         }
         form = PageAdminForm(data, instance=Page())
         self.assertFalse(form.is_valid())
-        self.assertEqual(form.errors.keys(), ['page_processor_config'])
+        self.assertEqual(list(form.errors.keys()), ['page_processor_config'])

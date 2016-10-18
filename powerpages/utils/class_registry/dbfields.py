@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
+
 import yaml
 
+from django.utils import six
 from django import forms
 from django.db import models
 from django.core.serializers.pyyaml import DjangoSafeDumper
@@ -68,7 +71,7 @@ class BaseRegistryItemConfigField(models.TextField):
         if value == "":
             return None
         try:
-            if isinstance(value, basestring):
+            if isinstance(value, six.string_types):
                 return yaml.load(value)
         except ValueError:
             pass

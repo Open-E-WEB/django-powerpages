@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
+
 import re
 
+from django.utils import six
 from django.test import TestCase
 from django.test.utils import override_settings
 from django.core.urlresolvers import reverse
@@ -13,6 +16,8 @@ from powerpages.models import Page
 
 
 def parse_sitemap(content):
+    if not isinstance(content, six.text_type):
+        content = content.decode('utf-8')
     urlset_match = re.search(
         r'<urlset[^>]*>(?P<urls>[\s\S]*)</urlset>', content
     )
@@ -31,6 +36,8 @@ def parse_sitemap(content):
 
 
 class PageSitemapTestCase(TestCase):
+
+    maxDiff = None
 
     def test_sitemap_view_empty(self):
         url = reverse('sitemap')

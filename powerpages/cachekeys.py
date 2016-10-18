@@ -1,11 +1,15 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
+
 import json
 import hashlib
 
+from django.utils import six
 
-URL_LIST_CACHE = "website:url_list"
-SITEMAP_CONTENT = "website:sitemap"
+
+URL_LIST_CACHE = 'powerpages:url_list'
+SITEMAP_CONTENT = 'powerpages:sitemap'
 
 
 def get_cache_name(prefix, name):
@@ -15,24 +19,24 @@ def get_cache_name(prefix, name):
     *) prefix=profile.cache, name=<requestuser.id>
     *) prefix=template.cache.sidebar, name=<requestuser.id>
     """
-    return u'{0}.{1}'.format(
-        prefix, hashlib.md5(unicode(name).encode('utf-8')).hexdigest()
+    return '{0}.{1}'.format(
+        prefix, hashlib.md5(six.text_type(name).encode('utf-8')).hexdigest()
     )
 
 
 def template_source(page_pk):
     """Create cache key for page template"""
-    return 'website:template:%s' % page_pk
+    return 'powerpages:template:{0}'.format(page_pk)
 
 
 def rendered_source_for_user(page_pk, user_id):
     """Create cache key for rendered page source based on current user"""
-    return 'website:rendered_source_user:%s:%s' % (page_pk, user_id)
+    return 'powerpages:rendered_source_user:{0}:{1}'.format(page_pk, user_id)
 
 
 def rendered_source_for_lang(page_pk, lang):
     """Create cache key for rendered page source based on current language"""
-    return 'website:rendered_source_lang:%s:%s' % (page_pk, lang)
+    return 'powerpages:rendered_source_lang:{0}:{1}'.format(page_pk, lang)
 
 
 def url_cache(name, *args, **kwargs):
@@ -41,4 +45,4 @@ def url_cache(name, *args, **kwargs):
     based on hashed serialized name with optional *args and **kwargs
     """
     serialized_url = json.dumps([name, args, kwargs], sort_keys=True)
-    return get_cache_name("website:urls", serialized_url)
+    return get_cache_name('powerpages:urls', serialized_url)

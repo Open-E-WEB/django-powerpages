@@ -8,6 +8,7 @@ develop: virtualenv
 	.env/bin/pip install --upgrade setuptools
 	.env/bin/pip install wheel
 	.env/bin/pip install twine
+	.env/bin/pip install ipdb
 	.env/bin/pip install Django==$(DJANGO_VERSION)
 	.env/bin/pip install -r requirements-test.pip
 

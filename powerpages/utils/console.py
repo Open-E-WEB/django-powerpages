@@ -2,6 +2,8 @@
 
 """Bunch of tools to provide nice console output."""
 
+from __future__ import unicode_literals
+
 import sys
 import math
 import re
@@ -33,7 +35,7 @@ class BaseStyle(object):
     @classmethod
     def style(cls, option, text):
         """Applies styling option to given text"""
-        return u"{start}{text}{reset}".format(
+        return '{start}{text}{reset}'.format(
             start=getattr(cls, option), text=text, reset=cls.RESET
         )
 
@@ -78,7 +80,7 @@ class Console(object):
             stream = sys.stdout
         self.stream = stream
 
-    def format(self, text, template=u"{text:<{min_length}}",
+    def format(self, text, template='{text:<{min_length}}',
                bg_color=None, fg_color=None, font=None, min_length=80):
         """Formats the output string"""
         if bg_color:
@@ -96,12 +98,12 @@ class Console(object):
 
     def same_line(self, text, **format_options):
         """Writes text in the same line"""
-        format_options['template'] = u'\r{text:<{min_length}}'
+        format_options['template'] = '\r{text:<{min_length}}'
         self.write(self.format(text, **format_options))
 
     def new_line(self, text,  **format_options):
         """Writes text in the new line"""
-        format_options['template'] = u'\r{text:<{min_length}}\n'
+        format_options['template'] = '\r{text:<{min_length}}\n'
         self.write(self.format(text, **format_options))
 
     # Shortcuts:
@@ -175,7 +177,7 @@ class ProgressBar(object):
             name = matchobj.group(0)[1:]
             if name not in replacements:
                 raise ValueError(
-                    u'Unknown ProgressBar.template variable ${0}'.format(name)
+                    'Unknown ProgressBar.template variable ${0}'.format(name)
                 )
             return replacements[name]
 

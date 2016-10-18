@@ -11,6 +11,8 @@ import difflib
 import collections
 import subprocess
 
+from django.utils import six
+
 from powerpages.utils.console import Console
 from powerpages.models import Page
 from powerpages.settings import app_settings
@@ -20,6 +22,12 @@ INDEX_FILE_NAME = '_index_.page'
 
 FILE_DELIMITER = '## TEMPLATE SOURCE: ##'
 FILE_DELIMITER_LINE = '\n{0}\n'.format(FILE_DELIMITER)
+
+
+if six.PY3:
+    default_get_input = input
+else:
+    default_get_input = raw_input
 
 
 def url_to_path(url, has_children):
@@ -54,10 +62,10 @@ def path_to_url(path):
 
 def generate_diff(current, coming):
     """Generates diff of changes"""
-    return u'\n'.join(
+    return '\n'.join(
         difflib.unified_diff(
             current.splitlines(), coming.splitlines(),
-            u"Current content", u"Coming changes"
+            'Current content', 'Coming changes'
         )
     )
 
@@ -103,18 +111,18 @@ class SyncStatus(object):
     FORCED = '!'
     # Descriptions:
     DESCRIPTIONS = {
-        ADDED: u"Added",
-        MODIFIED: u"Modified",
-        NO_CHANGES: u"No changes",
-        DELETED: u"Deleted",
-        SKIPPED: u"(skipped)",
-        FORCED: u"(forced)",
+        ADDED: 'Added',
+        MODIFIED: 'Modified',
+        NO_CHANGES: 'No changes',
+        DELETED: 'Deleted',
+        SKIPPED: '(skipped)',
+        FORCED: '(forced)',
     }
 
     @classmethod
     def describe(cls, status):
         """Descriptive version of status"""
-        return u" ".join(cls.DESCRIPTIONS[s] for s in status)
+        return ' '.join(cls.DESCRIPTIONS[s] for s in status)
 
 
 class PageFileDumper(object):
@@ -153,7 +161,8 @@ class PageFileDumper(object):
             collections.OrderedDict(
                 sorted((k, v) for k, v in page_fields.items())
             ),
-            indent=2
+            indent=2,
+            separators=(',', ': ')
         )
         return FILE_DELIMITER_LINE.join(
             (page_metadata, template_source)
@@ -232,7 +241,7 @@ class FilePageLoader(object):
             page_fields = self.load(self.file_contents())
         except ValueError:
             raise RuntimeError(
-                u'Bad .page file: {0}'.format(self.relative_path)
+                'Bad .page file: {0}'.format(self.relative_path)
             )
         return normalize_page_fields(page_fields)
 
@@ -303,7 +312,7 @@ class BaseSyncOperation(object):
         self.git_add = options['git_add']
         self.no_color = options.get('no_color')
         self.console = Console(self.stdout)
-        self.get_input = get_input or raw_input
+        self.get_input = get_input or default_get_input
 
     def status_fg_color(self, status):
         """Determines fg color for status"""
@@ -328,24 +337,24 @@ class BaseSyncOperation(object):
     def log_status(self, status, item):
         """Writes informative line about status of given item (in color!)"""
         if not self.quiet:
-            message = u"{0} {1}".format(status, item)
+            message = '{0} {1}'.format(status, item)
             self.console.new_line(
                 message, fg_color=self.status_fg_color(status)
             )
 
     def summary(self, summary_dict):
         """Writes summary line of text to stdout"""
-        self.console.new_line(u"SUMMARY:")
+        self.console.new_line('SUMMARY:')
         if summary_dict:
             for status, occurrences in summary_dict.items():
-                message = u"\t{0} [{1}] = {2}".format(
+                message = '\t{0} [{1}] = {2}'.format(
                     SyncStatus.describe(status), status, occurrences
                 )
                 self.console.new_line(
                     message, fg_color=self.status_fg_color(status)
                 )
         else:
-            self.console.new_line(u"\tNo changes!")
+            self.console.new_line('\tNo changes!')
 
     def error(self, message):
         """Stops processing by raising an exception"""
@@ -358,12 +367,12 @@ class BaseSyncOperation(object):
         else:
             # Delimiter:
             self.console.new_line(
-                u"{s} CONFIRMATION REQUIRED: {s}".format(s='#' * 28)
+                '{s} CONFIRMATION REQUIRED: {s}'.format(s='#' * 28)
             )
             # Show diff if available:
             diff = kwargs.get('diff')
             if diff:
-                self.console.new_line(u"{s} DIFF {s}".format(s='-' * 37))
+                self.console.new_line('{s} DIFF {s}'.format(s='-' * 37))
                 for diff_line in diff.splitlines():
                     if diff_line.startswith('+'):
                         fg_color = 'GREEN'
@@ -372,26 +381,26 @@ class BaseSyncOperation(object):
                     else:
                         fg_color = None
                     self.console.new_line(diff_line, fg_color=fg_color)
-                self.console.new_line(u"{s}".format(s='-' * 80))
+                self.console.new_line('{s}'.format(s='-' * 80))
             # Show other messages:
             message = kwargs.get('message')
             messages = [message] if message else list(args)
             messages.append(
                 kwargs.get(
-                    'question', u"Do you want to apply this change?"
+                    'question', 'Do you want to apply this change?'
                 )
             )
             for message in messages:
                 self.console.new_line(message)
             choice = None
             while choice is None:
-                user_text = self.get_input(u"Y/N? ")
+                user_text = self.get_input('Y/N? ')
                 if user_text in ('Y', 'y'):
                     choice = True
                 elif user_text in ('N', 'n'):
                     choice = False
             # Delimiter:
-            self.console.new_line(u"{s}".format(s='#' * 80))
+            self.console.new_line('{s}'.format(s='#' * 80))
         return choice
 
     def run(self):
@@ -414,11 +423,11 @@ class WebsiteDumpOperation(BaseSyncOperation):
             if status != SyncStatus.NO_CHANGES:
                 if status == SyncStatus.ADDED:
                     apply_change = self.confirm(
-                        u"Page created: {0}".format(page.url)
+                        'Page created: {0}'.format(page.url)
                     )
                 else:
                     apply_change = self.confirm(
-                        u"Page modified: {0}".format(page.url),
+                        'Page modified: {0}'.format(page.url),
                         diff=page_dumper.diff()
                     )
             else:
@@ -457,7 +466,7 @@ class WebsiteDumpOperation(BaseSyncOperation):
                     os.path.relpath(delete_path, app_settings.SYNC_DIRECTORY)
                 status = SyncStatus.DELETED
                 apply_change = self.confirm(
-                    u"Path to be deleted: {0}".format(relative_path)
+                    'Path to be deleted: {0}'.format(relative_path)
                 )
                 if not apply_change:
                     status += SyncStatus.SKIPPED
@@ -476,7 +485,7 @@ class WebsiteDumpOperation(BaseSyncOperation):
             not self.dry_run and
             self.confirm(
                 question=(
-                    u"Do you want to add created and removed files to GIT?"
+                    'Do you want to add created and removed files to GIT?'
                 )
             )
         ):
@@ -486,13 +495,13 @@ class WebsiteDumpOperation(BaseSyncOperation):
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE
             ).communicate()
             if errors:
-                raise self.error(u"Adding file changes to GIT failed!")
+                raise self.error('Adding file changes to GIT failed!')
 
     def run(self):
         """Performs the operation"""
         root_page = Page.objects.filter(url=self.root_url).first()
         if not root_page:
-            self.error(u'Root page "{0}" not found!'.format(self.root_url))
+            self.error('Root page "{0}" not found!'.format(self.root_url))
         summary = collections.defaultdict(int)
         valid_paths = self.dump_existing_pages(root_page, summary)
         self.delete_unused_files(root_page, valid_paths, summary)
@@ -518,7 +527,7 @@ class WebsiteLoadOperation(BaseSyncOperation):
             if not os.path.exists(
                 os.path.join(app_settings.SYNC_DIRECTORY, root_path)
             ):
-                self.error(u'Root page "{0}" not found!'.format(self.root_url))
+                self.error('Root page "{0}" not found!'.format(self.root_url))
             page_loaders = []
             walk_start = os.path.join(
                 app_settings.SYNC_DIRECTORY, os.path.dirname(root_path)
@@ -547,16 +556,16 @@ class WebsiteLoadOperation(BaseSyncOperation):
                 if status == SyncStatus.ADDED:
                     page_is_dirty = False
                     confirm_msgs.append(
-                        u"Page created: {0}".format(page_loader.url())
+                        'Page created: {0}'.format(page_loader.url())
                     )
                 else:
                     page_is_dirty = page_loader.page().is_dirty
                     confirm_msgs.append(
-                        u"Page modified: {0}".format(page_loader.url())
+                        'Page modified: {0}'.format(page_loader.url())
                     )
                     confirm_opts['diff'] = page_loader.diff()
                     if page_is_dirty:
-                        confirm_msgs.append(u"WARNING: Modified in Admin!")
+                        confirm_msgs.append('WARNING: Modified in Admin!')
                 if page_is_dirty and not self.force:
                     apply_change = False
                 else:
@@ -588,10 +597,10 @@ class WebsiteLoadOperation(BaseSyncOperation):
         for page in pages_to_delete:
             status = SyncStatus.DELETED
             confirm_msgs = [
-                u"Page to be deleted: {0} ({1})".format(page.url, page.pk)
+                'Page to be deleted: {0} ({1})'.format(page.url, page.pk)
             ]
             if page.is_dirty:
-                confirm_msgs.append(u"WARNING: Modified in Admin!")
+                confirm_msgs.append('WARNING: Modified in Admin!')
             if page.is_dirty and not self.force:
                 apply_change = False
             else:
@@ -612,7 +621,7 @@ class WebsiteLoadOperation(BaseSyncOperation):
         self.delete_unused_pages(valid_pks, summary)
         if self.dry_run:
             self.log(
-                u"WARNING: Number of deleted records may be inadequate "
-                u"when --dry-run is used!"
+                'WARNING: Number of deleted records may be inadequate '
+                'when --dry-run is used!'
             )
         self.summary(summary)

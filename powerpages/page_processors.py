@@ -1,7 +1,11 @@
 # -*-coding: utf-8 -*-
 
+from __future__ import unicode_literals
+
+import importlib
 import traceback
 
+from django.utils import six
 from django.forms import ValidationError
 from django.core.urlresolvers import reverse
 from django.core.cache import cache
@@ -27,7 +31,7 @@ class DefaultPageProcessor(ConfigurableClassRegistryItem):
 
     CONFIG_VARIABLES = (
         ConfigVariable(
-            'base template', converter=unicode,
+            'base template', converter=six.text_type,
             help_text="""
 * name of template to be used in {% extends ... %},
 * if not given parents' template is used and if page has no parent
@@ -146,8 +150,10 @@ sitemap settings: `changefreq`, `lastmod`, `priority`.
             self.render(context)
         except:
             tb_info = traceback.format_exc()
-            msg = u"""An error occurred trying to render the Page:
-                <br/><pre>%s</pre>""" % tb_info
+            msg = (
+                'An error occurred trying to render the Page:\n'
+                '<br/><pre>{0}</pre>'.format(tb_info)
+            )
             raise ValidationError(mark_safe(msg))
 
     def create_response(self, request, content):
@@ -167,22 +173,11 @@ sitemap settings: `changefreq`, `lastmod`, `priority`.
         """
         extra_context = {}
         context_processors = self.config.get('context processors')
-        for context_name in context_processors:
-            context_name = context_name.split('.')
-            context_module_name = ".".join(context_name[:-1])
-            context_function_name = context_name[-1]
-            try:
-                context_module = __import__(
-                    context_module_name, globals(), locals(),
-                    [context_function_name, ], -1
-                )
-            except ImportError:
-                pass
-            else:
-                context_function = getattr(
-                    context_module, context_function_name
-                )
-                extra_context.update(context_function(request))
+        for context_processor in context_processors:
+            module_name, function_name = context_processor.rsplit('.', 1)
+            module = importlib.import_module(module_name)
+            context_processor_function = getattr(module, function_name)
+            extra_context.update(context_processor_function(request))
         return extra_context
 
     def create_request_context(self, request, data=None):
@@ -227,9 +222,9 @@ sitemap settings: `changefreq`, `lastmod`, `priority`.
         if parent_page and not base_template:
             base_template = "page/%s" % parent_page.pk
         if base_template:
-            tag = u'{%% extends "%s" %%}' % base_template
+            tag = '{%% extends "%s" %%}' % base_template
         else:
-            tag = u''
+            tag = ''
         return tag
 
     def get_load_tag(self):
@@ -240,9 +235,9 @@ sitemap settings: `changefreq`, `lastmod`, `priority`.
         tag_libraries.extend(app_settings.TAG_LIBRARIES)
         tag_libraries.extend(self.config.get('tag libraries'))
         if tag_libraries:
-            tag = u'{%% load %s %%}' % " ".join(tag_libraries)
+            tag = '{%% load %s %%}' % " ".join(tag_libraries)
         else:
-            tag = u''
+            tag = ''
         return tag
 
     def get_template_source(self):
@@ -268,19 +263,19 @@ class RedirectProcessor(DefaultPageProcessor):
             """,
         ),
         ConfigVariable(
-            'to alias', converter=unicode,
+            'to alias', converter=six.text_type,
             help_text="""
 * CMS alias of target Page.
             """,
         ),
         ConfigVariable(
-            'to url', converter=unicode,
+            'to url', converter=six.text_type,
             help_text="""
 * URL address of target page.
             """,
         ),
         ConfigVariable(
-            'to name', converter=unicode,
+            'to name', converter=six.text_type,
             help_text="""
 * name of target URL managed by Django url resolver,
 * may be used together with `args` and `kwargs`.
@@ -354,8 +349,10 @@ class RedirectProcessor(DefaultPageProcessor):
             self.get_redirect_location()
         except:
             tb_info = traceback.format_exc()
-            msg = u"""An error occurred trying to render the Page:
-            <br/><pre>%s</pre>""" % tb_info
+            msg = (
+                'An error occurred trying to render the Page:\n'
+                '<br/><pre>{0}</pre>'.format(tb_info)
+            )
             raise ValidationError(mark_safe(msg))
 
 

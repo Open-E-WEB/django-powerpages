@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
+
 from django.core.validators import ValidationError
 
 
@@ -38,7 +40,7 @@ class Config(object):
                 variable.validate_value(self.data)
             except ValidationError as e:
                 for message in e.messages:
-                    errors.append(u'{0}: {1}'.format(name, message))
+                    errors.append('{0}: {1}'.format(name, message))
         if errors:
             raise ValidationError(errors)
 
@@ -47,11 +49,11 @@ class ConfigVariable(object):
     """Specification of config variable"""
 
     default_error_messages = {
-        'required': u'This variable is required.',
-        'invalid': u'Enter a valid value.',
+        'required': 'This variable is required.',
+        'invalid': 'Enter a valid value.',
         'unable_to_process':
-        u'Unable to process variable (%(exc_type)s: %(exc_message)s).',
-        'invalid_choice': u'%(value)s is not one of the available choices.',
+        'Unable to process variable (%(exc_type)s: %(exc_message)s).',
+        'invalid_choice': '%(value)s is not one of the available choices.',
     }
 
     def __init__(self, name, converter=None, default=None, choices=None,
