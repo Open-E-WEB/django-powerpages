@@ -25,6 +25,20 @@ class PageViewTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, '<h1>Hello world!</h1>')
 
+    def test_page_view_redirect_trailing_slash(self):
+        Page.objects.create(
+            url='/test/',
+            template='<h1>Hello world!</h1>'
+        )
+        response = self.client.get('/test')
+        self.assertRedirects(
+            response, '/test/', status_code=301
+        )
+
+    def test_page_view_not_found_missing(self):
+        response = self.client.get('/test/')
+        self.assertEqual(response.status_code, 404)
+
     def test_page_view_ok_template_inheritance(self):
         Page.objects.create(
             url='/',

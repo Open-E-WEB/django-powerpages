@@ -3,7 +3,6 @@
 from __future__ import unicode_literals
 
 from django import http
-from django.template import RequestContext
 from django.template.loader import render_to_string
 from django.contrib.auth.decorators import user_passes_test
 from django.core.cache import cache

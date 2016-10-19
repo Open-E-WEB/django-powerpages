@@ -74,7 +74,8 @@ class DjangoCommand(Command):
                         ]
                     },
                 },
-            ]
+            ],
+            STATIC_URL='/static/'
         )
         import django
         django.setup()
