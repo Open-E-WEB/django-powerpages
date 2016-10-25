@@ -221,7 +221,7 @@ class ProgressBar(object):
             )
         else:
             eta = '?'
-        screw = " " if last_step else self.screw_cycle.next()
+        screw = " " if last_step else next(self.screw_cycle)
         return self.line_template.format(
             bricks=self.progress_brick * filled_bricks,
             num_bricks=self.progress_num_bricks,

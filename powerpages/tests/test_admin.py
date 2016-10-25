@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 
-from  __future__ import unicode_literals
+from __future__ import unicode_literals
 
 from django.test import TestCase
+from django.conf import settings
+from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
 
 from powerpages.models import Page
@@ -162,4 +164,68 @@ class SavePageTestCase(TestCase):
         self.assertDictContainsSubset(
             {'page': page, 'user': user, 'created': False},
             self.page_edited_kwargs
+        )
+
+
+class SwitchEditModeViewTestCase(TestCase):
+
+    maxDiff = None
+
+    def setUp(self):
+        self.url = reverse('switch_edit_mode')
+        self.staff_member = User.objects.create_user(
+            'staff_member', password='letmein123', is_staff=True
+        )
+        self.super_user = User.objects.create_user(
+            'super_user', password='letmein123', is_superuser=True
+        )
+        self.regular_user = User.objects.create_user(
+            'regular_user', password='letmein123'
+        )
+        Page.objects.create(url='/')
+        Page.objects.create(url='/test-page/')
+
+    def test_enable_edit_mode_staff_member_referrer(self):
+        self.client.login(username='staff_member', password='letmein123')
+        response = self.client.get(self.url, HTTP_REFERER='/test-page/')
+        self.assertTrue(self.client.session.get('WEBSITE_EDIT_MODE'))
+        self.assertRedirects(response, '/test-page/')
+
+    def test_disable_edit_mode_staff_member_no_referrer(self):
+        self.client.login(username='staff_member', password='letmein123')
+        session = self.client.session
+        session['WEBSITE_EDIT_MODE'] = True
+        session.save()
+        response = self.client.get(self.url)
+        self.assertNotIn('WEBSITE_EDIT_MODE', self.client.session)
+        self.assertRedirects(response, '/')
+
+    def test_enable_edit_mode_super_user_no_referrer(self):
+        self.client.login(username='super_user', password='letmein123')
+        response = self.client.get(self.url)
+        self.assertTrue(self.client.session.get('WEBSITE_EDIT_MODE'))
+        self.assertRedirects(response, '/')
+
+    def test_disable_edit_mode_super_user_referrer(self):
+        self.client.login(username='super_user', password='letmein123')
+        session = self.client.session
+        session['WEBSITE_EDIT_MODE'] = True
+        session.save()
+        response = self.client.get(self.url, HTTP_REFERER='/test-page/')
+        self.assertNotIn('WEBSITE_EDIT_MODE', self.client.session)
+        self.assertRedirects(response, '/test-page/')
+
+    def test_access_forbidden_regular_user(self):
+        self.client.login(username='regular_user', password='letmein123')
+        response = self.client.get(self.url)
+        self.assertRedirects(
+            response, '{0}?next={1}'.format(settings.LOGIN_URL, self.url),
+            fetch_redirect_response=False
+        )
+
+    def test_access_forbidden_anonmous(self):
+        response = self.client.get(self.url)
+        self.assertRedirects(
+            response, '{0}?next={1}'.format(settings.LOGIN_URL, self.url),
+            fetch_redirect_response=False
         )

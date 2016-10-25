@@ -10,8 +10,10 @@ from django.core.management.base import BaseCommand, CommandError
 class BaseDumpLoadCommand(BaseCommand):
     """Base class for website dump / load commands"""
 
-    option_list = BaseCommand.option_list + (
-        make_option(
+    operation_class = None  # must be set in subclass
+
+    def add_arguments(self, parser):
+        parser.add_argument(
             '--dry-run',
             action='store_true',
             default=False,
@@ -21,7 +23,7 @@ class BaseDumpLoadCommand(BaseCommand):
                 "file system / database."
             )
         ),
-        make_option(
+        parser.add_argument(
             '--no-interactive',
             action='store_true',
             default=False,
@@ -30,7 +32,7 @@ class BaseDumpLoadCommand(BaseCommand):
                 "Do not ask user to confirm changes in file system / database."
             )
         ),
-        make_option(
+        parser.add_argument(
             '--quiet',
             action='store_true',
             default=False,
@@ -39,25 +41,22 @@ class BaseDumpLoadCommand(BaseCommand):
                 "Limits displayed output to summary of changes"
             )
         ),
-        make_option(
+        parser.add_argument(
             '-f', '--force',
             action='store_true',
             default=False,
             dest='force',
             help="Allows to overwite changes made in Admin."
         ),
-        make_option(
+        parser.add_argument(
             '--git-add',
             action='store_true',
             default=False,
             dest='git_add',
             help="Add created / removed files to GIT."
         )
-    )
 
-    operation_class = None  # must be set in subclass
-
-    def handle(self, root_url='/', **options):
+    def handle(self, root_url='/', stdout=None, stderr=None, **options):
         """Performs the operation"""
         operation = self.operation_class(
             root_url=root_url, error_class=CommandError,

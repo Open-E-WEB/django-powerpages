@@ -1,0 +1,33 @@
+{% load powerpages_tags staticfiles %}{% spaceless %}
+{% if show_info %}
+  {% if stylesheet %}
+<link rel="stylesheet" href="{% static 'powerpages/css/current_page_info.css' %}">
+  {% endif %}
+<div class="current-page-info">
+  <h5>Page Information:</h5>
+  {% if not page %}
+  <p><strong>(not available)</strong></p>
+  {% else %}
+  <ul>
+    <li>
+      <span>Name: </span>
+      <strong>{{ page.title|default:'(Undefined)' }}</strong>
+    </li>
+    <li>
+      <span>Alias: </span>
+      <strong>{{ page.alias|default:'(Undefined)' }}</strong>
+    </li>
+    <li>
+      <span>ID: </span>
+      <strong>{{ page.pk }}</strong>
+    </li>
+    <li>
+      <a href="{{ page.get_admin_url }}">edit in Admin &raquo;</a>
+    </li>
+    <li>
+       <a href="{% page_url switch_edit_mode %}">disable Edit Mode &raquo;</a>
+    </li>
+  </ul>
+  {% endif %}
+</div>
+{% endif %}{% endspaceless %}

@@ -93,3 +93,17 @@ class PageURLNode(template.Node):
 page_url = register.tag(
     'page_url', page_url_compiler(PageURLNode)
 )
+
+
+@register.inclusion_tag(
+    'powerpages/current_page_info.html', takes_context=True
+)
+def current_page_info(context, stylesheet=True):
+    request = context.get('request')
+    return {
+        'show_info': bool(
+            request and request.session.get('WEBSITE_EDIT_MODE')
+        ),
+        'page': context.get('website_page'),
+        'stylesheet': stylesheet,
+    }

@@ -10,6 +10,7 @@ import codecs
 from django.utils.six import StringIO
 from django.test import TestCase
 from django.test.utils import override_settings
+from django.core.management import call_command
 
 from powerpages.models import Page
 from powerpages.sync import (
@@ -627,6 +628,63 @@ class WebsiteDumpOperationTestCase(BaseSyncTestCase):
         # Check stderr:
         self.assertEqual(stderr.getvalue(), '')  # no errors
 
+    def test_dump_new_page_with_command(self):
+        Page.objects.create(
+            url='/a/b/test/',
+            alias='test-page',
+            description='At vero eos et accusamus et iusto odio',
+            keywords='lorem ipsum dolor sit amet',
+            page_processor='powerpages.RedirectProcessor',
+            page_processor_config={
+                'to url': '/test/'
+            },
+            template='<h1>{{ website_page.title }}</h1>\n',
+            title='De Finibus Bonorum et Malorum',
+        )
+        stdout = StringIO()
+        stderr = StringIO()
+        call_command(
+            'website_dump',
+            root_url='/a/b/test/',
+            stdout=stdout,
+            stderr=stderr,
+            get_input=lambda p: 'y',
+            dry_run=False,
+            no_interactive=False,
+            quiet=False,
+            force=False,
+            git_add=False,
+            no_color=True,
+        )
+        # Check result file:
+        path = os.path.join(self.sync_directory, 'a/b/test.page')
+        self.assertTrue(os.path.exists(path))
+        with codecs.open(path, encoding='utf-8') as f:
+            file_contents = f.read()
+        self.assertEqual(
+            file_contents,
+            _file_contents('''{
+  "alias": "test-page",
+  "description": "At vero eos et accusamus et iusto odio",
+  "keywords": "lorem ipsum dolor sit amet",
+  "page_processor": "powerpages.RedirectProcessor",
+  "page_processor_config": {
+    "to url": "/test/"
+  },
+  "title": "De Finibus Bonorum et Malorum"
+}
+## TEMPLATE SOURCE: ##
+<h1>{{ website_page.title }}</h1>
+            ''')
+        )
+        output = stdout.getvalue()
+        # Check stdout:
+        self.assertIn('[A] = 1', output)  # 1 file created
+        self.assertNotIn('[M] = ', output)  # no modifications
+        self.assertNotIn('[D] = ', output)  # no deletions
+        # Check stderr:
+        self.assertEqual(stderr.getvalue(), '')  # no errors
+
     def test_dump_modified_file(self):
         page = Page.objects.create(
             url='/a/b/test/',
@@ -792,6 +850,70 @@ class WebsiteLoadOperationTestCase(BaseSyncTestCase):
         self.assertEqual(page.page_processor_config, {"to url": "/test/"})
         self.assertEqual(page.title, "De Finibus Bonorum et Malorum")
         self.assertEqual(page.template, '<h1>{{ website_page.title }}</h1>\n')
+
+        output = stdout.getvalue()
+        # Check stdout:
+        self.assertIn('[A] = 1', output)  # 1 page added
+        self.assertNotIn('[M] = ', output)  # no modifications
+        self.assertNotIn('[D] = ', output)  # no deletions
+        # Check stderr:
+        self.assertEqual(stderr.getvalue(), '')  # no errors
+
+    def test_load_new_page_using_command(self):
+        # root page:
+        root = Page.objects.create(url='/')
+        PageFileDumper(root).save()
+        # sibling page:
+        sibling = Page.objects.create(url='/dummy/')
+        PageFileDumper(sibling).save()
+
+        self._make_file(
+            'test.page',
+            _file_contents('''{
+  "alias": "test-page",
+  "description": "At vero eos et accusamus et iusto odio",
+  "keywords": "lorem ipsum dolor sit amet",
+  "page_processor": "powerpages.RedirectProcessor",
+  "page_processor_config": {
+    "to url": "/test/"
+  },
+  "title": "De Finibus Bonorum et Malorum"
+}
+## TEMPLATE SOURCE: ##
+<h1>{{ website_page.title }}</h1>
+            '''),
+            make_dirs=False
+        )
+
+        stdout = StringIO()
+        stderr = StringIO()
+        call_command(
+            'website_load',
+            root_url='/',
+            stdout=stdout,
+            stderr=stderr,
+            get_input=lambda p: 'y',
+            dry_run=False,
+            no_interactive=False,
+            quiet=False,
+            force=False,
+            git_add=False,
+            no_color=True,
+        )
+        # Check result file:
+        page = Page.objects.filter(url='/test/').first()
+        self.assertIsNotNone(page)
+        self.assertEqual(page.alias, "test-page")
+        self.assertEqual(
+            page.description, "At vero eos et accusamus et iusto odio"
+        )
+        self.assertEqual(page.keywords, "lorem ipsum dolor sit amet")
+        self.assertEqual(page.page_processor,
+                         "powerpages.RedirectProcessor")
+        self.assertEqual(page.page_processor_config, {"to url": "/test/"})
+        self.assertEqual(page.title, "De Finibus Bonorum et Malorum")
+        self.assertEqual(page.template,
+                         '<h1>{{ website_page.title }}</h1>\n')
 
         output = stdout.getvalue()
         # Check stdout:
