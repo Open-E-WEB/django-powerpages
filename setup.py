@@ -101,7 +101,7 @@ class MakeMigrations(DjangoCommand):
 
 setup(
     name='django-powerpages',
-    version='0.0.5',
+    version='0.0.6',
     description=(
         'Developer-friendly, simple CMS for Django, "flatpages on steroids".'
     ),

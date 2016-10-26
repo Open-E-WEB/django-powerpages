@@ -3,6 +3,7 @@
 from __future__ import unicode_literals
 
 from django import template
+from django.core.urlresolvers import reverse, NoReverseMatch
 from django.template.base import kwarg_re
 from django.utils.encoding import smart_str
 
@@ -98,12 +99,22 @@ page_url = register.tag(
 @register.inclusion_tag(
     'powerpages/current_page_info.html', takes_context=True
 )
-def current_page_info(context, stylesheet=True):
+def current_page_info(context, stylesheet=True, url_namespace=None):
     request = context.get('request')
+    try:
+        if url_namespace:
+            switch_edit_mode_url = reverse(
+                '{0}:switch_edit_mode'.format(url_namespace)
+            )
+        else:
+            switch_edit_mode_url = reverse('switch_edit_mode')
+    except NoReverseMatch:
+        switch_edit_mode_url = reverse('powerpages:switch_edit_mode')
     return {
         'show_info': bool(
             request and request.session.get('WEBSITE_EDIT_MODE')
         ),
         'page': context.get('website_page'),
         'stylesheet': stylesheet,
+        'switch_edit_mode_url': switch_edit_mode_url,
     }
