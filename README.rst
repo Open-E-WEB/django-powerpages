@@ -96,18 +96,21 @@ This template tag can also reverse URLs of regular Django views.
 Page templates work as regular Django's templates with few modifications:
 
 1. ``{% extends ... %}`` tag should not be used:
- - by default each template inherits from template of parent page
- - parent template can be overwritten by providing ``base template`` option to the page processor config
+
+- by default each template inherits from template of parent page
+- parent template can be overwritten by providing ``base template`` option to the page processor config
+ 
 2. ``{% load ... %}`` tag is not necessary:
- - template tag libraries from ``settings.POWER_PAGES['TAG_LIBRARIES']`` are loaded automatically
- - additional libraries may be provided using ``tag libraries`` in page processor config
+
+- template tag libraries from ``settings.POWER_PAGES['TAG_LIBRARIES']`` are loaded automatically
+- additional libraries may be provided using ``tag libraries`` in page processor config
 
 *Page Processor* field allows to select a Python class responsible for processing requests for current page.
 Page processor can be configured using YAML config in *Page Processor Config* field.
 Default value, ``powerpages.DefaultPageProcessor`` just renders page content and returns the output as ``200 OK`` response.
 Other predefined options are:
-- ``powerpages.RedirectProcessor`` - creates ``301 Moved Permanently`` or ``302 Found`` response depending on boolean ``permanent`` parameter.
-  Redirect location is provided by URL (parameter ``to url``), view name (``to name``) or Page alias (``to alias``).
+
+- ``powerpages.RedirectProcessor`` - creates ``301 Moved Permanently`` or ``302 Found`` response depending on boolean ``permanent`` parameter. Redirect location is provided by URL (parameter ``to url``), view name (``to name``) or Page alias (``to alias``).
 - ``powerpages.NotFoundProcessor`` - generates ``404 Not Found`` response.
 
 Example configuration of default page processor:
