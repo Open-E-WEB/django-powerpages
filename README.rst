@@ -60,6 +60,28 @@ Include app's URLs at the end of your urlconf:
        url(r'', include('powerpages.urls', namespace='powerpages')),
    ]
 
+Add ``powerpages.loader.WebsiteLoader`` at end of your ``loaders`` in
+``TEMPLATES -> OPTIONS`` setting:
+
+.. code-block:: python
+
+   TEMPLATES = [
+       {
+           ...
+           'OPTIONS': {
+               ...
+               'loaders': [
+                   'django.template.loaders.filesystem.Loader',
+                   'django.template.loaders.app_directories.Loader',
+                   # Database template loader for powerpages app
+                   'powerpages.loader.WebsiteLoader',
+               ],
+               ...
+           }
+           ...
+       }
+   ]
+
 Run migrations:
 
 .. code-block:: python
