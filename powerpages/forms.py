@@ -77,7 +77,7 @@ class PageAdminForm(forms.ModelForm):
             original_attrs[name] = getattr(instance, name)
             setattr(instance, name, value)
         # Do the validation
-        request_factory = RequestFactory()
+        request_factory = RequestFactory(SERVER_NAME='localhost')
         request = request_factory.get(instance.url)
         request.session = {}
         request.user = AnonymousUser()
