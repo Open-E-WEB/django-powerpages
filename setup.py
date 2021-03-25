@@ -127,7 +127,7 @@ setup(
     ],
     keywords='django cms web',
     install_requires=[
-        'PyYAML==3.11',
+        'PyYAML==5.4',
     ],
     packages=find_packages(),
     include_package_data=True,
